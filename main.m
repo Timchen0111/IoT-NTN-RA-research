@@ -205,4 +205,3 @@ plot(UE_num_array,average_delay(3,:)/1000,'-*');
 xlabel('Number of UE')
 ylabel('average delay (s)')
 legend(legend_text,'location','best'); 
-%test
