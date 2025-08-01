@@ -35,7 +35,7 @@ tle = {...
     {'2', '44714', 53.0535, 102.2414, '0001160', 77.9513, 282.1606, 15.06405915315322}};
 start_time = 0;
 end_time = 24*60; %一天，分鐘
-step = 1; % 1 秒
+step = 10; % 1 秒
 %%%
 for idx = length(Parameter_setting):-1:1
     count = 0;
@@ -51,6 +51,7 @@ for UE_num = UE_num_array
     %visibility_time = 246900*ones(1,UE_num).*vt; %Set 4 LEO
     visibility_time = zeros(1, UE_num);
     for i = 1:UE_num
+        disp('meow')
         visibility_time(i) = compute_visibility_time(tle, UE_locations(i,:), start_time, end_time, step);
     end
     UE_state = zeros(1,UE_num); %0: active, 1: complete, -1: out of service time
