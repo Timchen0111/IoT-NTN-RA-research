@@ -38,6 +38,13 @@ disp('選定的基準時間')
 disp(example_UE_endt)
 start_time = posixtime(example_UE_endt)-3600; %示範UE終止時間的一小時前
 end_time = posixtime(example_UE_endt)+3600; %示範UE終止時間的一小時後
+endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
+disp('獲取終止時間')
+disp(endt)
+visibility_time_all = posixtime(endt)-posixtime(datetime('now'));
+disp('獲取可視時間集')
+save('visibility_time_all.mat')
+%% 
 
 %%%
 for idx = length(Parameter_setting):-1:1
@@ -49,11 +56,13 @@ for idx = length(Parameter_setting):-1:1
     end
 for UE_num = UE_num_array
     count = count+1;
+    disp("UE數量")
     disp(UE_num)
     %vt = rand(1,UE_num);
     %visibility_time = 246900*ones(1,UE_num).*vt; %Set 4 LEO
-    endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
-    visibility_time = posixtime(endt)-posixtime(datetime('now'));
+    %endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
+    %visibility_time = posixtime(endt)-posixtime(datetime('now'));
+    visibility_time = visibility_time_all(1:UE_num);
     UE_state = zeros(1,UE_num); %0: active, 1: complete, -1: out of service time
     delay = zeros(1,UE_num);
     %Backoff = zeros(1,UE_num);
