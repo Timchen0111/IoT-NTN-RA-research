@@ -46,8 +46,7 @@ function ue_endtime = compute_visibility_time(tle_data, UE_locations, start_time
     lon = UE_locations(:,2);
     gs_array = groundStation(sc, lat, lon);
     % === 5. 一次性建立所有 access（避免多次呼叫 satelliteScenario 計算） ===
-    ac_array = access(sat, gs_array); %找到瓶頸，這行極慢
-
+    ac_array = access(sat, gs_array); 
     % === 6. 初始化輸出變數 ===
     ue_endtime = NaT(N, 1, 'TimeZone', 'Asia/Taipei');
     disp("建置地面站完成")
@@ -55,10 +54,15 @@ function ue_endtime = compute_visibility_time(tle_data, UE_locations, start_time
     for i = 1:N
         intvls = accessIntervals(ac_array(i)); % 取得該 UE 與衛星的所有可見時間區間
         if ~isempty(intvls)
-            ue_endtime(i) = intvls{1,5}; % 取出最後一次的 EndTime
+            if start_time == 0
+                ue_endtime(i) = intvls{1,5}; % 取出最後一次的 EndTime
+            else
+                ue_endtime(i) = posixtime(intvls{1,5}); % 取出最後一次的 EndTime
+            end
         end
     end
 
     disp("可視時間計算完成");
+    clear sc sat gs_array ac_array
 end
 

@@ -36,12 +36,11 @@ example_UE = UE_locations(1,:);
 example_UE_endt = compute_visibility_time(tle, example_UE, 0, 24*60, step);%示範UE的終止時間
 disp('選定的基準時間')
 disp(example_UE_endt)
-start_time = posixtime(example_UE_endt)-3600; %示範UE終止時間的一小時前
-end_time = posixtime(example_UE_endt)+3600; %示範UE終止時間的一小時後
+start_time = posixtime(example_UE_endt)-600; %示範UE終止時間的十分鐘前
+end_time = posixtime(example_UE_endt)+600; %示範UE終止時間的十分鐘後
 endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
 disp('獲取終止時間')
-disp(endt)
-visibility_time_all = posixtime(endt)-posixtime(datetime('now'));
+visibility_time_all = endt-start_time;
 disp('獲取可視時間集')
 save('visibility_time_all.mat')
 %% 
