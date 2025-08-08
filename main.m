@@ -26,16 +26,19 @@ record_group = zeros(1,length(t_req));
 record_ACB = zeros(1,length(t_req));
 %%% For SGP4 
 % 分配 UE 位置
-UE_locations = zeros(max(UE_num_array), 3);
-UE_locations(:,1) = -90 + 180*rand(max(UE_num_array),1);
-UE_locations(:,2) = -180 + 360*rand(max(UE_num_array),1);
-UE_locations(:,3) = 0;
+UE_locations = generate_location(max(UE_num_array));
 tle = {...
-    {'1', '44714U', '19074B', 25211.90723748, 0.00002806, '00000+0', '20716-3', 0, 9996}, ...
-    {'2', '44714', 53.0535, 102.2414, '0001160', 77.9513, 282.1606, 15.06405915315322}};
-start_time = 0;
-end_time = 24*60; %一天，分鐘
-step = 10; % 1 秒
+    '1 44714U 19074B   25216.88326253  .00000799  00000+0  72522-4 0  9990', ...
+    '2 44714  53.0549  79.9036 0001271  84.0186 276.0948 15.06396482316077'};%starlink 1008
+step = 1; % 1 秒
+%%找出適合的模擬區間
+example_UE = UE_locations(1,:);
+example_UE_endt = compute_visibility_time(tle, example_UE, 0, 24*60, step);%示範UE的終止時間
+disp('選定的基準時間')
+disp(example_UE_endt)
+start_time = posixtime(example_UE_endt)-3600; %示範UE終止時間的一小時前
+end_time = posixtime(example_UE_endt)+3600; %示範UE終止時間的一小時後
+
 %%%
 for idx = length(Parameter_setting):-1:1
     count = 0;
@@ -49,11 +52,8 @@ for UE_num = UE_num_array
     disp(UE_num)
     %vt = rand(1,UE_num);
     %visibility_time = 246900*ones(1,UE_num).*vt; %Set 4 LEO
-    visibility_time = zeros(1, UE_num);
-    for i = 1:UE_num
-        disp('meow')
-        visibility_time(i) = compute_visibility_time(tle, UE_locations(i,:), start_time, end_time, step);
-    end
+    endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
+    visibility_time = posixtime(endt)-posixtime(datetime('now'));
     UE_state = zeros(1,UE_num); %0: active, 1: complete, -1: out of service time
     delay = zeros(1,UE_num);
     %Backoff = zeros(1,UE_num);
