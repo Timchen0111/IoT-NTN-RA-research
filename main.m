@@ -33,15 +33,22 @@ tle = {...
 step = 1; % 1 秒
 %%找出適合的模擬區間
 example_UE = UE_locations(1,:);
-example_UE_endt = compute_visibility_time(tle, example_UE, 0, 24*60, step);%示範UE的終止時間
+example_UE_t = compute_visibility_time(tle, example_UE, 0, 24*60, step);%示範UE的終止時間
+example_UE_startt = example_UE_t(1);
+example_UE_endt = example_UE_t(2);
 disp('選定的基準時間')
 disp(example_UE_endt)
-start_time = posixtime(example_UE_endt)-600; %示範UE終止時間的十分鐘前
-end_time = posixtime(example_UE_endt)+600; %示範UE終止時間的十分鐘後
-endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
-disp('獲取終止時間')
-visibility_time_all = endt-start_time;
-disp('獲取可視時間集')
+start_time = posixtime(example_UE_startt)-300; %示範UE終止時間的五分鐘前
+end_time = posixtime(example_UE_endt)+300; %示範UE終止時間的五分鐘後
+uet = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
+endt = uet(:,2);
+startt = uet(:,1);
+t_simulation_start = min(startt); 
+%disp('模擬開始時間')
+%k = datatime(t_simulation_start,'ConvertFrom', 'posixtime', 'TimeZone', 'Asia/Taipei');
+%disp(k);
+visibility_time_all = endt-t_simulation_start;%此計算的為離可視時間結束的時間，但是無法確定可視時間是否已經開始
+start_time_all = startt-t_simulation_start;
 save('visibility_time_all.mat')
 %% 
 
@@ -61,7 +68,8 @@ for UE_num = UE_num_array
     %visibility_time = 246900*ones(1,UE_num).*vt; %Set 4 LEO
     %endt = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
     %visibility_time = posixtime(endt)-posixtime(datetime('now'));
-    visibility_time = visibility_time_all(1:UE_num);
+    visibility_time = visibility_time_all(1:UE_num)*1000;
+    start_time = start_time_all(1:UE_num)*1000;
     UE_state = zeros(1,UE_num); %0: active, 1: complete, -1: out of service time
     delay = zeros(1,UE_num);
     %Backoff = zeros(1,UE_num);
@@ -73,7 +81,7 @@ for UE_num = UE_num_array
         attemptSource = zeros(N_EDT,N_sc);
         group_count = [0,0,0]; %For gold estimator
         for i = 1:UE_num
-            if visibility_time(i) < serviceoff_time && UE_state(i) == 0
+            if (visibility_time(i) < serviceoff_time || start_time(i)<simulation_time) && UE_state(i) == 0
                UE_state(i) = -1; %Check out of visibility
             end
             if UE_state(i) == 0 %&& Backoff(i) <= 0
