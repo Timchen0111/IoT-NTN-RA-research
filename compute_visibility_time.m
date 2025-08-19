@@ -75,6 +75,7 @@ function visibility_time = compute_visibility_time(tle_data, UE_locations, start
             end
         end
     end
+    
     disp("可視時間計算完成");
     visibility_time = [ue_starttime, ue_endtime];
     clear sc sat gs_array ac_array

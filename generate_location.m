@@ -2,7 +2,7 @@ function UE_locations = generate_location(num_UE)
 % 台北市中心位置 (近似)
 center_lat = 25;     % 緯度
 center_lon = 121.5;    % 經度
-radius_km = 50;           % 半徑 50 公里
+radius_km = 500;           % 半徑 500 公里
 earth_radius = 6371;      % 地球半徑 (km)
 
 % 隨機產生角度與距離 (均勻分布在圓內)

@@ -13,11 +13,11 @@ BO = 1; %NBIoT BO ID 7 先停用backoff(Wu's work理論推導無backoff)
 ACB = ones(1,3);
 replica_num = ones(1,3);
 serviceoff_time = 11000; %time unit: ms
-t_req = [30000 20000 serviceoff_time];
+t_req = [400000 50000 serviceoff_time];
 %set1: t1=30s, t2=60s
 %set2: t1=20s, t2=30s
 %%%Use for simulation control
-UE_num_array = 1000:1000:10000;
+UE_num_array = 10000:5000:50000;
 Parameter_setting = [1 2 3]; %1:Wu's allocation 2:equal resource 3: No grouping
 all_success_rate = zeros(length(Parameter_setting),length(UE_num_array));
 average_delay = zeros(length(Parameter_setting),length(UE_num_array));
@@ -32,6 +32,7 @@ tle = {...
     '2 44714  53.0549  79.9036 0001271  84.0186 276.0948 15.06396482316077'};%starlink 1008
 step = 1; % 1 秒
 %%找出適合的模擬區間
+%{
 example_UE = UE_locations(1,:);
 example_UE_t = compute_visibility_time(tle, example_UE, 0, 24*60, step);%示範UE的終止時間
 example_UE_startt = example_UE_t(1);
@@ -41,6 +42,9 @@ disp(example_UE_endt)
 start_time = posixtime(example_UE_startt)-300; %示範UE終止時間的五分鐘前
 end_time = posixtime(example_UE_endt)+300; %示範UE終止時間的五分鐘後
 uet = compute_visibility_time(tle, UE_locations, start_time, end_time, step);
+%}
+load('500km.mat');
+uet = uet_all;
 endt = uet(:,2);
 startt = uet(:,1);
 t_simulation_start = min(startt); 
@@ -49,7 +53,6 @@ t_simulation_start = min(startt);
 %disp(k);
 visibility_time_all = endt-t_simulation_start;%此計算的為離可視時間結束的時間，但是無法確定可視時間是否已經開始
 start_time_all = startt-t_simulation_start;
-save('visibility_time_all.mat')
 %% 
 
 %%%
@@ -81,9 +84,12 @@ for UE_num = UE_num_array
         attemptSource = zeros(N_EDT,N_sc);
         group_count = [0,0,0]; %For gold estimator
         for i = 1:UE_num
-            if (visibility_time(i) < serviceoff_time || start_time(i)<simulation_time) && UE_state(i) == 0
+            if visibility_time(i) < serviceoff_time  && UE_state(i) == 0
                UE_state(i) = -1; %Check out of visibility
             end
+            if start_time(i) > simulation_time
+                continue %visibility period尚未開始
+            end        
             if UE_state(i) == 0 %&& Backoff(i) <= 0
                 %Determine the CE level
                 if visibility_time(i)<t_req(2)
@@ -194,7 +200,7 @@ for UE_num = UE_num_array
             N_sc_CE = allocated_result(select_index,:);
 
             %%for debug%%
-            if UE_num == 5000
+            if UE_num == 20000
                  record_N_sc_CE(end+1,:) = N_sc_CE;
                  record_group(end+1,:) = group_count;
                  record_ACB(end+1,:) = ACB;
