@@ -30,4 +30,4 @@ for i = 1:60
     end
     uet_all = [uet_all; uet];
 end
-save("500km.mat")
+save("50km.mat")
